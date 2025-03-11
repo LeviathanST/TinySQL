@@ -11,3 +11,4 @@ I said "Nah, bro, just gimme a computer and a coffe". Come explore this adventur
 # Adventure Map 🗺️
 - [Episode 1: The Dark Ages](https://github.com/LeviathanST/TinySQL/blob/master/dev_notes/episode1.md)
 - [Episode 2: Rise of the Input](https://github.com/LeviathanST/TinySQL/blob/master/dev_notes/episode2.md)
+- [Episode 3: Soul Forge](https://github.com/LeviathanST/TinySQL/blob/master/dev_notes/episode3.md)
