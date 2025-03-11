@@ -11,8 +11,8 @@
  - Check my setup here: [My C setup (LSP, Formatter)](https://github.com/LeviathanST/nvim-config/pull/1). Neovim fam, you're welcome to steal this!
 
 ## Battle
-- **Hello, World!** First stab at C glory [(My Pull Request)] (https://github.com/LeviathanST/TinySQL/pull/1)
+- **Hello, World!** First stab at C glory [(My Pull Request)](https://github.com/LeviathanST/TinySQL/pull/1)
     1. **Makefile Magic:** Tired of typing `gcc main.c -o tinysql && ./tinysql` every time. Makefile = one-word victory: make 🤯. Boom, built and running in oneshot!
     2. **Organized Chaos:** Stuffed code in `src/`, config stuff outside. Why? Finding `main.c` in a mess later sounds like a nightmare. Trust me, this will pay off when TinySQL grow up!
-- **First Strike: Data, Baby!** [(My Pull request)] (https://github.com/LeviathanST/TinySQL/pull/2)
+- **First Strike: Data, Baby!** [(My Pull request)](https://github.com/LeviathanST/TinySQL/pull/2)
   - "WTF!" - right? No text files, just *BAM*, data's there. Funny first win, but it's quicker than reading files!
