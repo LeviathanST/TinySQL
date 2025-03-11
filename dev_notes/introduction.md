@@ -9,5 +9,5 @@ I was a coder - chasing bugs, mainlining coffe. Then I died. No clue how - Stack
 I said "Nah, bro, just gimme a computer and a coffe". Come explore this adventure with me.
 
 # Adventure Map 🗺️
-- [Episode 1: The Dark Ages] (https://github.com/LeviathanST/TinySQL/edit/master/dev_notes/episode1.md)
-- [Episode 2: Rise of the Input] (https://github.com/LeviathanST/TinySQL/edit/master/dev_notes/episode2.md)
+- [Episode 1: The Dark Ages](https://github.com/LeviathanST/TinySQL/blob/master/dev_notes/episode1.md)
+- [Episode 2: Rise of the Input](https://github.com/LeviathanST/TinySQL/blob/master/dev_notes/episode2.md)
