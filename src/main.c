@@ -2,13 +2,13 @@
 #include <stddef.h>
 #include <stdio.h>
 
-struct Person {
+typedef struct {
   char name[20];
   int age;
-};
+} Person;
 
 int main() {
-  struct Person people[100] = {
+  Person people[100] = {
       {"Alice", 30},
       {"Bob", 31},
   };
@@ -18,7 +18,7 @@ int main() {
   bool out = false;
 
   while (!out) {
-    struct Person p;
+    Person p;
 
     printf("Type name: ");
     scanf("%s", p.name);
