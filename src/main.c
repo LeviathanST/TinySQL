@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct {
   char name[20];
@@ -8,32 +10,35 @@ typedef struct {
 } Person;
 
 int main() {
-  Person people[100] = {
-      {"Alice", 30},
-      {"Bob", 31},
-  };
-  int curr_idx = 2;
+  int capacity = 4;
+  int total = 3;
+  Person *p = malloc(sizeof(Person) * capacity);
 
   char format[] = "%s - %d\n"; // name - age
-  bool out = false;
 
-  while (!out) {
-    Person p;
+  strcpy(p[0].name, "Alice");
+  p[0].age = 30;
 
-    printf("Type name: ");
-    scanf("%s", p.name);
+  strcpy(p[1].name, "Bob");
+  p[1].age = 31;
 
-    printf("Type age: ");
-    scanf("%d", &p.age);
-
-    people[curr_idx] = p;
-
-    for (int i = 0; i <= curr_idx; i++) {
-      printf(format, people[i].name, people[i].age);
+  while (true) {
+    if (total > capacity) {
+      capacity *= 2;
+      p = realloc(p, sizeof(Person) * capacity);
     }
 
-    curr_idx++;
-  }
+    printf("Type name:\n");
+    scanf("%s", p[total - 1].name);
 
+    printf("Type age:\n");
+    scanf("%d", &p[total - 1].age);
+
+    for (int i = 0; i < total; i++) {
+      printf(format, p[i].name, p[i].age);
+    }
+    total++;
+  }
+  free(p);
   return 0;
 }
