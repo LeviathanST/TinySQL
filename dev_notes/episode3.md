@@ -6,7 +6,7 @@
   - But first—loose vars are trash! Souls in random arrays? It’s so suck—no meaning, just a chaotic data puke. Forge ‘em right, then bust the memory chains!
 
 # Peparement
-**Thoughts:**
+- **Thoughts:**
     - **Struct:** This is like a constructor for everything. Suitable for make our people information more meaning.
     - **Memory Barrier:** Array are fixed-length garbage, 100 slots. Hmmm...! So we need a way to be able to change the length of that array. YESSSSS, that's it! `malloc`, `realloc` - stretch that ledger infinite, baby!!
 
