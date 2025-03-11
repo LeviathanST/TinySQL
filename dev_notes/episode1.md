@@ -5,8 +5,8 @@
 - **Why I need this:** Without a real data tool, I'm stuck in the digital Stone Age - drowning in files, cursing at I/O lag, and begging for a search that doesn't stuck. Souls slip while I fumble—unacceptable for a reaper.
 
 ## Preparement
-- **C for life (I don't have more option in there)**
-*Plot twist: I barely know C when I alives. But that’s not stopping me from swinging at this piñata. Time to flex some Google-fu and get my tools ready.*
+- **C for life (I don't have more option in there)**\
+*Plot twist: I barely know C when I alives. But that’s not stopping me from swinging at this piñata. Time to flex some Google-fu and get my tools ready.*\
 **Tooling up:** I will choose Neovim as my text editor. So let's set up Neovim LSP and Formatter for C
  - Check my setup here: [My C setup (LSP, Formatter)](https://github.com/LeviathanST/nvim-config/pull/1). Neovim fam, you're welcome to steal this!
 
