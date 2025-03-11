@@ -5,3 +5,7 @@
    |  No files,      |\
    |  just vibes     |\
    +-----------------+\
+
+# Adventure Map 🗺️
+[Episode 1: The Dark Ages] (https://github.com/LeviathanST/TinySQL/dev_notes/epsiode1.md)
+[Episode 2: Rise of the Input] (https://github.com/LeviathanST/TinySQL/dev_notes/epsiode2.md)
