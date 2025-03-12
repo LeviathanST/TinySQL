@@ -1,12 +1,22 @@
 # Plan
 *In somewhere there isn't any data saving tools, we are a digital grim reaper, no cloak and list soon-will-be-die, just a comupter and a coffee, we created one inspired by SQLite*
-- Data saving? No text files - no I/O slow and dump.
-  - Data is hardcoded and compiled in our code.
-    - Use variable and array.
-    - Then use struct to make more sense.
-  - Hm... But we need more data!
-    - User input - add input to fixed length array
-    - `malloc`, `realloc` for unlimited length array
-- Comeback to file but smarter!
-  - Exploded RAM => Using disk
-    - Writting and reading data in a file with binary data
+- [x] Soul information (data) saving? No text files - no I/O slow and dump.
+  - [x] EP 1: Data is hardcoded and compiled in our code.
+    - [x] Use variable and array.
+    - [x] Then use struct to make more sense.
+  - [x] EP 2: Hm... But we need more data! ()
+    - [x] User input - add input to fixed length array
+    - [x] `malloc`, `realloc` for unlimited length array
+- [ ] Comeback to file but smarter!
+  - [x] EP 4: Exploded RAM => Using disk
+    - [x] Writting and reading data in a file with binary
+  - [ ] EP 5: Interact with a soul in data file.
+    - [ ] Find 
+    - [ ] Update
+    - [ ] Delete
+- [ ] Many kinds!
+  - [ ] EP 6: How to interact with a specified soul of specific type?
+    - [ ] Storing
+    - [ ] Find
+    - [ ] Update
+    - [ ] Delete
