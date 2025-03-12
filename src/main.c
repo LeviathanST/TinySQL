@@ -22,7 +22,7 @@ void init() {
       printf("Cannot init data file for souls: %s", strerror(errno));
       return;
     }
-    int default_total = DEFAULT_TOTAL;
+    short default_total = DEFAULT_TOTAL;
     fwrite(&default_total, 2, 1, p_file);
     fclose(p_file);
     return;
@@ -41,6 +41,7 @@ void increase_curr_total() {
   rewind(p_file);
   fread(&curr_total, 2, 1, p_file);
   curr_total++;
+  rewind(p_file);
   fwrite(&curr_total, 2, 1, p_file);
 
   fclose(p_file);
