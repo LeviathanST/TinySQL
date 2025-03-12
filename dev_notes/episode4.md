@@ -1,0 +1,7 @@
+- Commit 1: [Enhance UI](https://github.com/LeviathanST/TinySQL/commit/c7d33f22e9eed69180365ab82545eafc84276bf9)
+- Commit 2: [Init data file if not exist](https://github.com/LeviathanST/TinySQL/commit/3d99d5db0766c48d6e2b3180c404be08b8d08421)
+- Commit 3: [Write a soul to data file](https://github.com/LeviathanST/TinySQL/commit/4eecb4698da23cf5fe0a917742fd82b3e5973d66)
+- Commit 4: [Increase current total](https://github.com/LeviathanST/TinySQL/commit/15dcaf053ed4145b44b1531152a07684e39e2e58)
+- Commit 5: [Update write soul and sperate increase current total](https://github.com/LeviathanST/TinySQL/commit/daf0fecbac26e9fb3b038d851a35938313a12b7a)
+- Commit 6: [Change total datatype](https://github.com/LeviathanST/TinySQL/commit/80aaf708eb7b182a475b4d22440e6c3615ba9ab7)
+- Commit 7: [Read all](https://github.com/LeviathanST/TinySQL/commit/44c1dec672eb7f6132ecd840f5ca7c0c4dddce4a)
