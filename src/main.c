@@ -60,6 +60,31 @@ void write_a_soul(Person *p) {
   increase_curr_total();
 }
 
+void read_all() {
+  FILE *p_file = fopen(PATH, "rb");
+  char format[] = "%s - %d\n";
+  if (!p_file) {
+    printf("Cannot open souls data file: %s", strerror(errno));
+    return;
+  }
+
+  short curr_total;
+  rewind(p_file);
+  fread(&curr_total, 2, 1, p_file);
+
+  Person buffer[curr_total];
+  fseek(p_file, 2, SEEK_SET);
+  fread(buffer, sizeof(Person), curr_total, p_file);
+
+  printf("Total: %d\n", curr_total);
+  printf("---\n");
+  for (int i = 0; i < curr_total; i++) {
+    printf(format, buffer[i].name, buffer[i].age);
+  }
+  printf("---\n");
+  fclose(p_file);
+}
+
 int main() {
   init();
   while (true) {
@@ -82,7 +107,7 @@ int main() {
       break;
     }
     case 2:
-      // Function to read all souls
+      read_all();
       break;
     default:
       break;
