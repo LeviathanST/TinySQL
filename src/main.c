@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define PATH "/path/to/data/file"
+#define PATH "./souls"
 #define DEFAULT_TOTAL 0
 
 typedef struct {
@@ -27,8 +27,19 @@ void init() {
     fclose(p_file);
     return;
   }
+}
 
-  printf("Data file is exists!");
+void write_a_soul(Person *p) {
+  FILE *p_file = fopen(PATH, "ab+");
+
+  if (p_file == NULL) {
+    printf("Cannot open souls data file: %s", strerror(errno));
+    return;
+  }
+
+  fwrite(p, sizeof(Person), 1, p_file);
+  fclose(p_file);
+  return;
 }
 
 int main() {
@@ -40,9 +51,18 @@ int main() {
     int choice;
     scanf("%d", &choice);
     switch (choice) {
-    case 1:
-      // Function to write a soul
+    case 1: {
+      Person p;
+
+      printf("Type name:");
+      scanf("%s", p.name);
+
+      printf("Type age:");
+      scanf("%d", &p.age);
+
+      write_a_soul(&p);
       break;
+    }
     case 2:
       // Function to read all souls
       break;
