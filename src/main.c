@@ -36,7 +36,15 @@ void write_a_soul(Person *p) {
     printf("Cannot open souls data file: %s", strerror(errno));
     return;
   }
+  // NOTE: Increase current total
+  int curr_total;
 
+  fseek(p_file, 0, SEEK_SET); // move to start file
+  fread(&curr_total, 2, 1, p_file);
+  ++curr_total;
+  fwrite(&curr_total, 2, 1, p_file);
+
+  fseek(p_file, 0, SEEK_END); // Move to end file
   fwrite(p, sizeof(Person), 1, p_file);
   fclose(p_file);
   return;
