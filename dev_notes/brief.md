@@ -7,5 +7,6 @@
   - Hm... But we need more data!
     - User input - add input to fixed length array
     - `malloc`, `realloc` for unlimited length array
+- Comeback to file but smarter!
   - Exploded RAM => Using disk
     - Writting and reading data in a file with binary data
