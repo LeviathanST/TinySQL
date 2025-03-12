@@ -29,25 +29,34 @@ void init() {
   }
 }
 
-void write_a_soul(Person *p) {
-  FILE *p_file = fopen(PATH, "ab+");
-
-  if (p_file == NULL) {
+void increase_curr_total() {
+  FILE *p_file = fopen(PATH, "rb+");
+  if (!p_file) {
     printf("Cannot open souls data file: %s", strerror(errno));
     return;
   }
-  // NOTE: Increase current total
+
   int curr_total;
 
-  fseek(p_file, 0, SEEK_SET); // move to start file
+  rewind(p_file);
   fread(&curr_total, 2, 1, p_file);
-  ++curr_total;
+  curr_total++;
   fwrite(&curr_total, 2, 1, p_file);
 
-  fseek(p_file, 0, SEEK_END); // Move to end file
-  fwrite(p, sizeof(Person), 1, p_file);
   fclose(p_file);
-  return;
+}
+
+void write_a_soul(Person *p) {
+  FILE *p_file = fopen(PATH, "ab");
+
+  if (!p_file) {
+    printf("Cannot open souls data file: %s", strerror(errno));
+    return;
+  }
+  fwrite(p, sizeof(Person), 1, p_file);
+
+  fclose(p_file);
+  increase_curr_total();
 }
 
 int main() {
