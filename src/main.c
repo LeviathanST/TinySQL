@@ -1,92 +1,12 @@
-#include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 
-#define PATH "./souls"
-#define DEFAULT_TOTAL 0
-
-typedef struct {
-  char name[20];
-  int age;
-} Person;
-
-// NOTE: Init data file if not exists
-void init() {
-  int is_exists = access(PATH, F_OK);
-  if (is_exists == -1) {
-    FILE *p_file = fopen(PATH, "wb+");
-    if (p_file == NULL) {
-      printf("Cannot init data file for souls: %s", strerror(errno));
-      return;
-    }
-    short default_total = DEFAULT_TOTAL;
-    fwrite(&default_total, 2, 1, p_file);
-    fclose(p_file);
-    return;
-  }
-}
-
-void increase_curr_total() {
-  FILE *p_file = fopen(PATH, "rb+");
-  if (!p_file) {
-    printf("Cannot open souls data file: %s", strerror(errno));
-    return;
-  }
-
-  int curr_total;
-
-  rewind(p_file);
-  fread(&curr_total, 2, 1, p_file);
-  curr_total++;
-  rewind(p_file);
-  fwrite(&curr_total, 2, 1, p_file);
-
-  fclose(p_file);
-}
-
-void write_a_soul(Person *p) {
-  FILE *p_file = fopen(PATH, "ab");
-
-  if (!p_file) {
-    printf("Cannot open souls data file: %s", strerror(errno));
-    return;
-  }
-  fwrite(p, sizeof(Person), 1, p_file);
-
-  fclose(p_file);
-  increase_curr_total();
-}
-
-void read_all() {
-  FILE *p_file = fopen(PATH, "rb");
-  char format[] = "%s - %d\n";
-  if (!p_file) {
-    printf("Cannot open souls data file: %s", strerror(errno));
-    return;
-  }
-
-  short curr_total;
-  rewind(p_file);
-  fread(&curr_total, 2, 1, p_file);
-
-  Person buffer[curr_total];
-  fseek(p_file, 2, SEEK_SET);
-  fread(buffer, sizeof(Person), curr_total, p_file);
-
-  printf("Total: %d\n", curr_total);
-  printf("---\n");
-  for (int i = 0; i < curr_total; i++) {
-    printf(format, buffer[i].name, buffer[i].age);
-  }
-  printf("---\n");
-  fclose(p_file);
-}
+#include "soul.h"
 
 int main() {
-  init();
+  soul_init();
   while (true) {
     printf("1: Add\n");
     printf("2: Get All\n");
@@ -103,11 +23,11 @@ int main() {
       printf("Type age:");
       scanf("%d", &p.age);
 
-      write_a_soul(&p);
+      soul_write_a(&p);
       break;
     }
     case 2:
-      read_all();
+      soul_read_all();
       break;
     default:
       break;
