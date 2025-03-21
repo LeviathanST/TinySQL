@@ -4,10 +4,11 @@
 #define PATH "./souls"
 #define DEFAULT_TOTAL 0
 
-typedef struct {
-  char name[20];
+typedef struct Person Person;
+struct Person {
+  char name[256];
   int age;
-} Person;
+};
 
 /// Init new data file if not exists
 void soul_init();
@@ -17,5 +18,7 @@ void soul_write_a(Person *p);
 
 /// Get all souls
 void soul_read_all();
+
+void soul_find_a_with_name(char *name);
 
 #endif
