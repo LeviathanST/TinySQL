@@ -15,6 +15,8 @@
     - [x] Write and read data in a binary file.
   - [ ] **EP 5**: Soul Manipulation.
     - [ ] Find 
+      - [x] It works!
+      - [ ] What if the data gets larger with the current organization code?
     - [ ] Update
     - [ ] Delete
 
