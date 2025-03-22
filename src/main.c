@@ -5,9 +5,10 @@
 #include <unistd.h>
 
 #include "soul.h"
+#define PATH "./souls"
 
 int main() {
-  soul_init();
+  soul_init(PATH);
   while (true) {
     printf("1: Add\n");
     printf("2: Get All\n");
@@ -25,11 +26,11 @@ int main() {
       printf("Type age:");
       scanf("%d", &p->age);
 
-      soul_write_a(p);
+      soul_write_a(PATH, p);
       break;
     }
     case 2: {
-      ResultSet *rs = soul_read_all();
+      ResultSet *rs = soul_read_all(PATH);
       char format[] = "%s - %u\n";
 
       printf("----------\n");
@@ -53,7 +54,10 @@ int main() {
       printf("Type name: \n");
       scanf("%s", name);
 
-      p = soul_find_a_with_name(name);
+      p = soul_find_a_with_name(PATH, name);
+      if (!p) {
+        break;
+      }
       printf("----------\n");
       printf("Name: %s\n", p->name);
       printf("Age: %u\n", p->age);

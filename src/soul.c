@@ -7,12 +7,12 @@
 
 #include "soul.h"
 
-int soul_init() {
-  int is_exists = access(PATH, F_OK);
+int soul_init(const char *path) {
+  int is_exists = access(path, F_OK);
   if (is_exists == -1) {
-    FILE *p_file = fopen(PATH, "wb+");
+    FILE *p_file = fopen(path, "wb+");
     if (p_file == NULL) {
-      printf("Cannot init data file for souls: %s", strerror(errno));
+      printf("Cannot init data file for souls: %s\n", strerror(errno));
       return 0;
     }
     short default_total = DEFAULT_TOTAL;
@@ -22,8 +22,8 @@ int soul_init() {
   return 1;
 }
 
-void soul_increase_curr_total() {
-  FILE *p_file = fopen(PATH, "rb+");
+void soul_increase_curr_total(const char *path) {
+  FILE *p_file = fopen(path, "rb+");
   if (!p_file) {
     printf("Cannot open souls data file: %s", strerror(errno));
     return;
@@ -39,27 +39,26 @@ void soul_increase_curr_total() {
   fclose(p_file);
 }
 
-int soul_write_a(Person *p) {
-  FILE *p_file = fopen(PATH, "ab");
+int soul_write_a(const char *path, Person *p) {
+  FILE *p_file = fopen(path, "ab");
 
   if (!p_file) {
-    printf("Cannot open souls data file: %s", strerror(errno));
+    printf("Cannot open souls data file: %s\n", strerror(errno));
     return 0;
   }
   fwrite(p, sizeof(Person), 1, p_file);
 
   fclose(p_file);
-  soul_increase_curr_total();
+  soul_increase_curr_total(path);
   return 1;
 }
 
-ResultSet *soul_read_all() {
-  FILE *p_file = fopen(PATH, "rb");
-  char format[] = "%s - %d\n";
+ResultSet *soul_read_all(const char *path) {
+  FILE *p_file = fopen(path, "rb");
   ResultSet *rs = malloc(sizeof(ResultSet));
 
   if (!p_file) {
-    printf("Cannot open souls data file: %s", strerror(errno));
+    printf("Cannot open souls data file: %s\n", strerror(errno));
     return 0;
   }
 
@@ -78,10 +77,10 @@ ResultSet *soul_read_all() {
   return rs;
 }
 
-Person *soul_find_a_with_name(char *name) {
-  Person *p;
-  FILE *p_file = fopen(PATH, "rb");
-  char format[] = "%s - %d\n";
+// TODO: Enhance performance
+// - Using index
+Person *soul_find_a_with_name(const char *path, char *name) {
+  FILE *p_file = fopen(path, "rb");
   if (!p_file) {
     printf("Cannot open souls data file: %s", strerror(errno));
     return 0;
@@ -97,16 +96,11 @@ Person *soul_find_a_with_name(char *name) {
   fread(buffer, sizeof(Person), curr_total, p_file);
 
   for (int i = 0; i < curr_total; i++) {
-    p = malloc(sizeof(Person));
-    strcpy((char *)p->name, (char *)buffer[i].name);
-    p->age = buffer[i].age;
-    if (!ht_insert(p_ht, buffer[i].name, p)) {
+    if (!ht_insert(p_ht, buffer[i].name, &buffer[i])) {
       printf("Something went wrong when insert in hash table!");
       return 0;
     }
   }
-  free(buffer);
-  free(p);
 
   Person *result = ht_get(p_ht, name);
   if (!result) {
@@ -115,6 +109,7 @@ Person *soul_find_a_with_name(char *name) {
   }
 
   fclose(p_file);
+  free(buffer);
   ht_clear(p_ht);
   return result;
 }
