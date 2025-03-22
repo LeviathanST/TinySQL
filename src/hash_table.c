@@ -69,9 +69,9 @@ void *ht_get(ht *p_ht, const char *key) {
     if (strcmp(node->key, key) == 0) {
       return node->data;
     } else {
-      ht_node *p_curr_node = node;
+      ht_node *p_curr_node = node->next;
       while (p_curr_node) {
-        if (strcmp(p_curr_node->key, key)) {
+        if (strcmp(p_curr_node->key, key) == 0) {
           return p_curr_node->data;
         }
         p_curr_node = p_curr_node->next;
