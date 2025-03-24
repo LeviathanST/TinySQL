@@ -121,7 +121,9 @@ Person *soul_find_a_with_name(const char *path, const char *name) {
   fread(index, sizeof(Index), curr_total, p_file);
 
   for (int i = 0; i < curr_total; i++) {
-    ht_insert(p_ht, index[i].key, &index[i].offset);
+    if (!ht_insert(p_ht, index[i].key, &index[i].offset)) {
+      return 0;
+    };
   }
 
   unsigned int *offset = ht_get(p_ht, name);
