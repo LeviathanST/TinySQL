@@ -18,15 +18,15 @@ int main() {
     scanf("%d", &choice);
     switch (choice) {
     case 1: {
-      Person *p = malloc(sizeof(Person));
+      Person p;
 
       printf("Type name:");
-      scanf("%s", p->name);
+      scanf("%s", p.name);
 
       printf("Type age:");
-      scanf("%d", &p->age);
+      scanf("%d", &p.age);
 
-      soul_write_a(PATH, p);
+      soul_write_a(PATH, &p);
       break;
     }
     case 2: {
@@ -51,7 +51,7 @@ int main() {
     case 3: {
       Person *p;
       char name[20];
-      printf("Type name: \n");
+      printf("Type name:\n");
       scanf("%s", name);
 
       p = soul_find_a_with_name(PATH, name);
