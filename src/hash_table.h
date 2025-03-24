@@ -10,7 +10,7 @@ struct HashNode {
   void *data;
 };
 struct HashTable {
-  int size;
+  unsigned int size;
   ht_node **node;
 };
 
