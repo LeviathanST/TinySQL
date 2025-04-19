@@ -6,16 +6,18 @@ const Soul = struct {
 };
 
 pub fn main() !void {
-    const soul = Soul{
-        .name = "Hung",
-        .age = 18,
+    const souls = [2]Soul{
+        Soul{ .name = "Hung", .age = 19 },
+        Soul{ .name = "Ngoc", .age = 18 },
     };
 
-    std.debug.print(
-        "{s} - {d}",
-        .{
-            soul.name,
-            soul.age,
-        },
-    );
+    for (souls) |soul| {
+        std.debug.print(
+            "{s} - {d}\n",
+            .{
+                soul.name,
+                soul.age,
+            },
+        );
+    }
 }
