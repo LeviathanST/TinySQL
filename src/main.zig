@@ -2,7 +2,7 @@ const std = @import("std");
 const Writer = std.io.Writer;
 const Reader = std.io.Reader;
 
-const MAX_LIST_LENGTH: usize = 2;
+const MAX_LIST_LENGTH: usize = 100;
 var current_idx: usize = 0;
 
 const Soul = struct {
@@ -93,6 +93,10 @@ pub fn main() !void {
     var choice_buf: [2]u8 = undefined;
 
     while (true) {
+        try stdout.print("Max souls: {d}\n", .{MAX_LIST_LENGTH});
+        try stdout.print("Current total:  {d}\n", .{current_idx});
+        try stdout.writeAll("---\n");
+
         const choice_input = try stdin.readUntilDelimiter(&choice_buf, '\n');
         const choice = try std.fmt.parseInt(u8, choice_input, 10);
         switch (choice) {
