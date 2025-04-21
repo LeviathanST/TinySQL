@@ -56,6 +56,29 @@ fn write_soul(
     list[idx] = soul;
 }
 
+fn find_by_name(
+    stdin: anytype,
+    stdout: anytype,
+    list: *[MAX_LIST_LENGTH]Soul,
+) anyerror!void {
+    try stdout.writeAll("Search: ");
+    var name_buffer: [100]u8 = undefined;
+    const name = try stdin.readUntilDelimiter(&name_buffer, '\n');
+
+    try stdout.writeAll("Result:\n");
+    try stdout.writeAll("----\n");
+    for (list) |soul| {
+        if (std.mem.eql(u8, soul.name, name)) {
+            try stdout.print("Name {s}\n", .{soul.name});
+            try stdout.print("Age {d}\n", .{soul.age});
+            try stdout.writeAll("---\n");
+            return;
+        }
+    }
+    try stdout.print("Not found {s}\n", .{name});
+    try stdout.writeAll("---\n");
+}
+
 pub fn main() !void {
     var souls: [MAX_LIST_LENGTH]Soul = undefined;
 
@@ -92,6 +115,9 @@ pub fn main() !void {
             2 => {
                 try display_souls(stdout, &souls);
                 continue;
+            },
+            3 => {
+                try find_by_name(stdin, stdout, &souls);
             },
             else => {
                 try stdout.writeAll("Your choice not found!");
