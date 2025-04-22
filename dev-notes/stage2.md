@@ -1,0 +1,2 @@
+- Every time I wanna increase the maximum array size, I have to exit the application. But when I do so, the data will be deleted and I have to deal with that.
+- [x] Create a dynamic array by ArrayList which is provided by Zig with infinite size.
