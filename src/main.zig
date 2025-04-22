@@ -1,25 +1,27 @@
 const std = @import("std");
 const Writer = std.io.Writer;
 const Reader = std.io.Reader;
+const ArrayList = std.ArrayList;
+const Allocator = std.mem.Allocator;
 
-const MAX_LIST_LENGTH: usize = 100;
 var current_idx: usize = 0;
 
 const Soul = struct {
-    name: []const u8,
+    name: []u8,
     age: u8,
 };
 
 fn displaySouls(
     stdout: anytype,
-    list: *[MAX_LIST_LENGTH]Soul,
+    list: *ArrayList(Soul),
 ) anyerror!void {
     try stdout.writeAll("Result:\n");
     try stdout.writeAll("----\n");
     if (current_idx <= 0) {
         try stdout.writeAll("The storage is empty!\n");
+        return;
     }
-    for (list[0..current_idx]) |soul| {
+    for (list.items) |soul| {
         try stdout.print("Name {s}\n", .{soul.name});
         try stdout.print("Age {d}\n", .{soul.age});
         try stdout.writeAll("----\n");
@@ -28,9 +30,8 @@ fn displaySouls(
 fn writeSoul(
     stdin: anytype,
     stdout: anytype,
-    allocator: std.mem.Allocator,
-    list: *[MAX_LIST_LENGTH]Soul,
-    idx: usize,
+    allocator: Allocator,
+    list: *ArrayList(Soul),
 ) anyerror!void {
     var name_buffer: [100]u8 = undefined;
     var age_buffer: [10]u8 = undefined;
@@ -42,8 +43,10 @@ fn writeSoul(
     try stdout.print("Name:\n", .{});
     var fbs = std.io.fixedBufferStream(&name_buffer);
     try stdin.streamUntilDelimiter(fbs.writer(), '\n', fbs.buffer.len);
-    var name_copy = try allocator.alloc(u8, fbs.getWritten().len);
-    @memcpy(name_copy[0..], fbs.getWritten());
+    const input_len = fbs.getWritten().len;
+
+    var name_copy = try allocator.alloc(u8, input_len);
+    @memcpy(name_copy[0..input_len], fbs.getWritten());
 
     try stdout.print("Age:\n", .{});
     const age_input = try stdin.readUntilDelimiter(&age_buffer, '\n');
@@ -53,13 +56,13 @@ fn writeSoul(
         .age = age,
     };
 
-    list[idx] = soul;
+    try list.append(soul);
 }
 
 fn findByName(
     stdin: anytype,
     stdout: anytype,
-    list: *[MAX_LIST_LENGTH]Soul,
+    list: *ArrayList(Soul),
 ) anyerror!void {
     try stdout.writeAll("Search: ");
     var name_buffer: [100]u8 = undefined;
@@ -67,7 +70,7 @@ fn findByName(
 
     try stdout.writeAll("Result:\n");
     try stdout.writeAll("----\n");
-    for (list) |soul| {
+    for (list.items) |soul| {
         if (std.mem.eql(u8, soul.name, name)) {
             try stdout.print("Name {s}\n", .{soul.name});
             try stdout.print("Age {d}\n", .{soul.age});
@@ -80,12 +83,15 @@ fn findByName(
 }
 
 pub fn main() !void {
-    var souls: [MAX_LIST_LENGTH]Soul = undefined;
+    const allocator = std.heap.page_allocator;
 
-    // Use ArenaAllocator to allocate mutiple times and only once free.
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
+    // Here Im using ArrayList because we need an array of infinite size.
+    // ArrayList, in other words, is just a fixed array,
+    // when adding items reaches the limit we call "capacity"
+    // it will calculate itself and increase the capacity amount.
+    // Hence, we have a infinite growing array.
+    var souls = ArrayList(Soul).init(std.heap.page_allocator);
+    defer souls.deinit();
 
     const stdin = std.io.getStdIn().reader();
     const stdout = std.io.getStdOut().writer();
@@ -93,7 +99,6 @@ pub fn main() !void {
     var choice_buf: [2]u8 = undefined;
 
     while (true) {
-        try stdout.print("Max souls: {d}\n", .{MAX_LIST_LENGTH});
         try stdout.print("Current total:  {d}\n", .{current_idx});
         try stdout.writeAll("---\n");
 
@@ -101,20 +106,14 @@ pub fn main() !void {
         const choice = try std.fmt.parseInt(u8, choice_input, 10);
         switch (choice) {
             1 => {
-                if (current_idx < souls.len) {
-                    try writeSoul(
-                        stdin,
-                        stdout,
-                        allocator,
-                        &souls,
-                        current_idx,
-                    );
-                    current_idx += 1;
-                    continue;
-                } else {
-                    try stdout.writeAll("The storage is full!");
-                    continue;
-                }
+                try writeSoul(
+                    stdin,
+                    stdout,
+                    allocator,
+                    &souls,
+                );
+                current_idx += 1;
+                continue;
             },
             2 => {
                 try displaySouls(stdout, &souls);
