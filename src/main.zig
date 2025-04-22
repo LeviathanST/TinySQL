@@ -10,7 +10,7 @@ const Soul = struct {
     age: u8,
 };
 
-fn display_souls(
+fn displaySouls(
     stdout: anytype,
     list: *[MAX_LIST_LENGTH]Soul,
 ) anyerror!void {
@@ -25,7 +25,7 @@ fn display_souls(
         try stdout.writeAll("----\n");
     }
 }
-fn write_soul(
+fn writeSoul(
     stdin: anytype,
     stdout: anytype,
     allocator: std.mem.Allocator,
@@ -56,7 +56,7 @@ fn write_soul(
     list[idx] = soul;
 }
 
-fn find_by_name(
+fn findByName(
     stdin: anytype,
     stdout: anytype,
     list: *[MAX_LIST_LENGTH]Soul,
@@ -102,7 +102,7 @@ pub fn main() !void {
         switch (choice) {
             1 => {
                 if (current_idx < souls.len) {
-                    try write_soul(
+                    try writeSoul(
                         stdin,
                         stdout,
                         allocator,
@@ -117,11 +117,12 @@ pub fn main() !void {
                 }
             },
             2 => {
-                try display_souls(stdout, &souls);
+                try displaySouls(stdout, &souls);
                 continue;
             },
             3 => {
-                try find_by_name(stdin, stdout, &souls);
+                try findByName(stdin, stdout, &souls);
+                continue;
             },
             else => {
                 try stdout.writeAll("Your choice not found!");
