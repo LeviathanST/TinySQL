@@ -4,8 +4,6 @@ const Reader = std.io.Reader;
 const ArrayList = std.ArrayList;
 const Allocator = std.mem.Allocator;
 
-var current_idx: usize = 0;
-
 const Soul = struct {
     name: []u8,
     age: u8,
@@ -17,7 +15,7 @@ fn displaySouls(
 ) anyerror!void {
     try stdout.writeAll("Result:\n");
     try stdout.writeAll("----\n");
-    if (current_idx <= 0) {
+    if (list.items.len <= 0) {
         try stdout.writeAll("The storage is empty!\n");
         return;
     }
@@ -99,7 +97,7 @@ pub fn main() !void {
     var choice_buf: [2]u8 = undefined;
 
     while (true) {
-        try stdout.print("Current total:  {d}\n", .{current_idx});
+        try stdout.print("Current total:  {d}\n", .{souls.items.len});
         try stdout.writeAll("---\n");
 
         const choice_input = try stdin.readUntilDelimiter(&choice_buf, '\n');
@@ -112,7 +110,6 @@ pub fn main() !void {
                     allocator,
                     &souls,
                 );
-                current_idx += 1;
                 continue;
             },
             2 => {
