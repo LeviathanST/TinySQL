@@ -1,17 +1,14 @@
 const std = @import("std");
+const SoulList = @import("./SoulList.zig").SoulList;
+const Soul = @import("./SoulList.zig").Soul;
 const Writer = std.io.Writer;
 const Reader = std.io.Reader;
 const ArrayList = std.ArrayList;
 const Allocator = std.mem.Allocator;
 
-const Soul = struct {
-    name: []u8,
-    age: u8,
-};
-
 fn displaySouls(
     stdout: anytype,
-    list: *ArrayList(Soul),
+    list: *SoulList,
 ) anyerror!void {
     try stdout.writeAll("Result:\n");
     try stdout.writeAll("----\n");
@@ -19,7 +16,7 @@ fn displaySouls(
         try stdout.writeAll("The storage is empty!\n");
         return;
     }
-    for (list.items) |soul| {
+    for (list.items[0..list.current_total]) |soul| {
         try stdout.print("Name {s}\n", .{soul.name});
         try stdout.print("Age {d}\n", .{soul.age});
         try stdout.writeAll("----\n");
@@ -28,10 +25,9 @@ fn displaySouls(
 fn writeSoul(
     stdin: anytype,
     stdout: anytype,
-    allocator: Allocator,
-    list: *ArrayList(Soul),
+    list: *SoulList,
 ) anyerror!void {
-    var name_buffer: [100]u8 = undefined;
+    var name_buffer: [32]u8 = undefined;
     var age_buffer: [10]u8 = undefined;
 
     // readUntilDelimiter is deprecated since 0.11.0
@@ -41,26 +37,19 @@ fn writeSoul(
     try stdout.print("Name:\n", .{});
     var fbs = std.io.fixedBufferStream(&name_buffer);
     try stdin.streamUntilDelimiter(fbs.writer(), '\n', fbs.buffer.len);
-    const input_len = fbs.getWritten().len;
-
-    var name_copy = try allocator.alloc(u8, input_len);
-    @memcpy(name_copy[0..input_len], fbs.getWritten());
+    var name_input = fbs.getWritten();
 
     try stdout.print("Age:\n", .{});
     const age_input = try stdin.readUntilDelimiter(&age_buffer, '\n');
     const age = try std.fmt.parseInt(u8, age_input, 10);
-    const soul = Soul{
-        .name = name_copy,
-        .age = age,
-    };
 
-    try list.append(soul);
+    try list.append(name_input[0..], age);
 }
 
 fn findByName(
     stdin: anytype,
     stdout: anytype,
-    list: *ArrayList(Soul),
+    list: *SoulList,
 ) anyerror!void {
     try stdout.writeAll("Search: ");
     var name_buffer: [100]u8 = undefined;
@@ -68,8 +57,8 @@ fn findByName(
 
     try stdout.writeAll("Result:\n");
     try stdout.writeAll("----\n");
-    for (list.items) |soul| {
-        if (std.mem.eql(u8, soul.name, name)) {
+    for (list.items[0..list.current_total]) |soul| {
+        if (std.mem.eql(u8, &soul.name, name)) {
             try stdout.print("Name {s}\n", .{soul.name});
             try stdout.print("Age {d}\n", .{soul.age});
             try stdout.writeAll("---\n");
@@ -83,12 +72,7 @@ fn findByName(
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
 
-    // Here Im using ArrayList because we need an array of infinite size.
-    // ArrayList, in other words, is just a fixed array,
-    // when adding items reaches the limit we call "capacity"
-    // it will calculate itself and increase the capacity amount.
-    // Hence, we have a infinite growing array.
-    var souls = ArrayList(Soul).init(std.heap.page_allocator);
+    var souls = try SoulList.init(allocator);
     defer souls.deinit();
 
     const stdin = std.io.getStdIn().reader();
@@ -97,19 +81,15 @@ pub fn main() !void {
     var choice_buf: [2]u8 = undefined;
 
     while (true) {
-        try stdout.print("Current total:  {d}\n", .{souls.items.len});
+        try stdout.print("Maximum:  {d}\n", .{souls.capacity});
+        try stdout.print("Current total:  {d}\n", .{souls.current_total});
         try stdout.writeAll("---\n");
 
         const choice_input = try stdin.readUntilDelimiter(&choice_buf, '\n');
         const choice = try std.fmt.parseInt(u8, choice_input, 10);
         switch (choice) {
             1 => {
-                try writeSoul(
-                    stdin,
-                    stdout,
-                    allocator,
-                    &souls,
-                );
+                try writeSoul(stdin, stdout, &souls);
                 continue;
             },
             2 => {
@@ -121,7 +101,6 @@ pub fn main() !void {
                 continue;
             },
             else => {
-                try stdout.writeAll("Your choice not found!");
                 continue;
             },
         }
