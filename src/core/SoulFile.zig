@@ -47,6 +47,7 @@ pub fn createIfNotExists(self: Self) (File.OpenError || File.WriteError || Error
     try std.io.getStdOut().writer().print("Initialized database file with name {s}!\n", .{self.ctx.data_file_path});
 }
 
+// TODO: Replace the old current total instead of append new
 pub fn write(self: Self, soul: Soul) !void {
     const file = try cwd().openFile(self.ctx.data_file_path, .{ .mode = File.OpenMode.read_write });
     defer file.close();
@@ -92,3 +93,9 @@ pub fn getAll(self: Self, allocator: Allocator) !SoulList {
     }
     return list;
 }
+
+// TODO:
+pub fn updateA() void {}
+
+// TODO:
+pub fn deleteA() void {}
