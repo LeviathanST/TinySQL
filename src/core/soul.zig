@@ -1,25 +1,37 @@
-///! The copying of ArrayList
+///! The copying of ArrayList for Soul
 // TODO: Test
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const expect = std.testing.expect;
 const assert = std.debug.assert;
 
-const SoulError = error{NameTooLong};
+pub const Soul = extern struct {
+    pub const Error = error{NameTooLong};
+    const Self = @This();
 
-pub const Soul = struct {
     name: [32]u8,
     age: u8,
+
+    pub fn fromUserInput(name: []u8, age: u8) Error!Self {
+        if (name.len > 32) return Error.NameTooLong;
+        var validated_name = [_]u8{0} ** 32;
+        @memcpy(validated_name[0..name.len], name[0..]);
+        return .{
+            .name = validated_name,
+            .age = age,
+        };
+    }
 };
+
 pub const SoulList = struct {
+    const Self = @This();
+
     allocator: Allocator,
     items: []Soul,
     current_total: usize,
     capacity: usize,
 
-    const Self = @This();
-
-    pub fn init(allocator: Allocator) anyerror!Self {
+    pub fn init(allocator: Allocator) !Self {
         return Self{
             .allocator = allocator,
             .items = &[0]Soul{},
@@ -28,6 +40,7 @@ pub const SoulList = struct {
         };
     }
 
+    /// Free whole slice memory
     pub fn deinit(self: *Self) void {
         self.allocator.free(self.intoSlice());
     }
@@ -38,14 +51,7 @@ pub const SoulList = struct {
         return self.items.ptr[0..self.capacity];
     }
 
-    pub fn append(self: *Self, name: []u8, age: u8) (Allocator.Error || SoulError)!void {
-        if (name.len > 32) return SoulError.NameTooLong;
-        var validated_name = [_]u8{0} ** 32;
-        @memcpy(validated_name[0..name.len], name);
-        const soul = Soul{
-            .name = validated_name,
-            .age = age,
-        };
+    pub fn append(self: *Self, soul: Soul) Allocator.Error!void {
         const new_len = self.current_total + 1;
         try self.ensureTotalCapacity(new_len);
         self.items[self.current_total] = soul;
@@ -71,16 +77,13 @@ test "Append 3 items" {
     var souls = try SoulList.init(allocator);
     defer souls.deinit();
 
-    var name_hung: [32]u8 = [_]u8{0} ** 32;
-    @memcpy(name_hung[0.."Hung".len], "Hung");
-    var name_alice: [32]u8 = [_]u8{0} ** 32;
-    @memcpy(name_alice[0.."Alice".len], "Alice");
-    var name_bob: [32]u8 = [_]u8{0} ** 32;
-    @memcpy(name_bob[0.."Bob".len], "Bob");
+    const soul1 = Soul{ .name = "Hung", .age = 19 };
+    const soul2 = Soul{ .name = "Ngoc", .age = 18 };
+    const soul3 = Soul{ .name = "Zigg", .age = 20 };
 
-    try souls.append(&name_hung, 19);
-    try souls.append(&name_alice, 20);
-    try souls.append(&name_bob, 21);
+    try souls.append(soul1);
+    try souls.append(soul2);
+    try souls.append(soul3);
 
     const slice = souls.intoSlice();
     try expect(std.mem.eql(u8, slice[0].name[0..4], "Hung"));
@@ -102,5 +105,5 @@ test "Error" {
     var buffer_too_long: [34]u8 = [_]u8{0} ** 34;
     @memcpy(buffer_too_long[0.."ThisNameIsWayTooLongToFitIn32Bytes".len], "ThisNameIsWayTooLongToFitIn32Bytes");
 
-    try std.testing.expectError(SoulError.NameTooLong, souls.append(&buffer_too_long, 200));
+    try std.testing.expectError(Soul.Error.NameTooLong, souls.append(&buffer_too_long, 200));
 }
