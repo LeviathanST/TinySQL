@@ -1,46 +1,49 @@
 const std = @import("std");
 const core = @import("core.zig");
+const SoulUI = @import("ui.zig").SoulUI;
+const TinySQLContext = @import("context.zig");
 const SoulList = core.SoulList;
+const SoulFile = core.SoulFile;
 const Soul = core.Soul;
-const Writer = std.io.Writer;
-const Reader = std.io.Reader;
 const ArrayList = std.ArrayList;
 const Allocator = std.mem.Allocator;
 
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
-
-    var souls = try SoulList.init(allocator);
-    defer souls.deinit();
-
-    const stdin = std.io.getStdIn().reader();
-    const stdout = std.io.getStdOut().writer();
+    const ctx = comptime TinySQLContext.init("database.db");
+    const fileHandler = try SoulFile.init(ctx);
+    const ui = SoulUI.init(ctx);
+    try fileHandler.createIfNotExists();
 
     var choice_buf: [2]u8 = undefined;
 
-    while (true) {
-        try stdout.print("Maximum:  {d}\n", .{souls.capacity});
-        try stdout.print("Current total:  {d}\n", .{souls.current_total});
-        try stdout.writeAll("---\n");
-
-        const choice_input = try stdin.readUntilDelimiter(&choice_buf, '\n');
+    w: while (true) {
+        const choice_input = try ctx.stdin.readUntilDelimiter(&choice_buf, '\n');
         const choice = try std.fmt.parseInt(u8, choice_input, 10);
         switch (choice) {
             1 => {
-                try core.writeSoul(stdin, stdout, &souls);
-                continue;
+                const soul = try ui.writePrompt();
+                try fileHandler.write(soul);
+                continue :w;
             },
             2 => {
-                try core.displaySouls(stdout, &souls);
-                continue;
+                const list = try fileHandler.getAll(allocator);
+                try ui.displayAll(list);
+                continue :w;
             },
             3 => {
-                try core.findByName(stdin, stdout, &souls);
-                continue;
+                const name = try ui.findPrompt();
+                const soul = try fileHandler.findA(allocator, name);
+                try ui.displayA(soul);
+                continue :w;
             },
             else => {
-                continue;
+                break;
             },
         }
     }
+}
+
+test {
+    std.testing.refAllDecls(@This());
 }
