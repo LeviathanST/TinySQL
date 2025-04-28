@@ -15,10 +15,12 @@ const File = std.fs.File;
 const Allocator = std.mem.Allocator;
 
 const cwd = std.fs.cwd;
+const print = std.debug.print;
+const expect = std.testing.expect;
 // Only support Linux
 const detectCpu = std.zig.system.linux.detectNativeCpuAndFeatures;
 
-const Error = error{CpuArchNotFound};
+const FindError = error{ CpuArchNotFound, DataFileNotFound, SoulNotFound };
 const Self = @This();
 
 ctx: TinySQLContext,
@@ -30,7 +32,7 @@ pub fn init(comptime ctx: TinySQLContext) !Self {
 }
 
 ///Create data file with 'filename' if not exists
-pub fn createIfNotExists(self: Self) (File.OpenError || File.WriteError || Error)!void {
+pub fn createIfNotExists(self: Self) (File.OpenError || File.WriteError)!void {
     const file = std.fs.cwd().createFile(self.ctx.data_file_path, .{ .exclusive = true }) catch |err| {
         switch (err) {
             error.PathAlreadyExists => return,
@@ -47,33 +49,25 @@ pub fn createIfNotExists(self: Self) (File.OpenError || File.WriteError || Error
     try std.io.getStdOut().writer().print("Initialized database file with name {s}!\n", .{self.ctx.data_file_path});
 }
 
-// TODO: Replace the old current total instead of append new
+///Write a soul into data file
 pub fn write(self: Self, soul: Soul) !void {
     const file = try cwd().openFile(self.ctx.data_file_path, .{ .mode = File.OpenMode.read_write });
     defer file.close();
-
-    var current_total = try file.reader().readInt(u16, .little);
-
-    try file.seekBy(2 + current_total * @sizeOf(Soul));
-    try file.writer().writeStruct(soul);
-
-    current_total += 1;
     try file.seekTo(0);
-    try file.writer().writeInt(u16, current_total, .little);
+    const current_total = try file.reader().readInt(u16, .little);
+    try file.seekTo(2 + current_total * @sizeOf(Soul));
+    try file.writer().writeStruct(soul);
+    try file.seekTo(0);
+    try file.writer().writeInt(u16, current_total + 1, .little);
 }
 
-pub fn findA(self: Self, allocator: Allocator, name: []u8) !?Soul {
+pub fn findA(self: Self, allocator: Allocator, name: []const u8) !?Soul {
     const file = try cwd().openFile(self.ctx.data_file_path, .{ .mode = File.OpenMode.read_only });
     defer file.close();
     const souls = try self.getAll(allocator);
-    const name_len = name.len;
-    if (name_len > 32) return SoulErr.NameTooLong;
-    var buf = [1]u8{0} ** 32;
-    @memcpy(buf[0..name_len], name);
+    if (name.len > 32) return SoulErr.NameTooLong;
     for (souls.items[0..souls.current_total]) |soul| {
-        std.debug.print("{d}\n", .{buf[0..]});
-        std.debug.print("{d}\n", .{soul.name[0..]});
-        if (std.mem.eql(u8, &soul.name, &buf)) {
+        if (std.mem.eql(u8, &soul.name, @as(*[32]u8, @ptrCast(@constCast(name))))) {
             return soul;
         }
     }
@@ -98,4 +92,48 @@ pub fn getAll(self: Self, allocator: Allocator) !SoulList {
 pub fn updateA() void {}
 
 // TODO:
-pub fn deleteA() void {}
+pub fn deleteA(self: Self, allocator: Allocator, name: []u8) !void {
+    var found_idx: ?usize = undefined;
+    if (name.len > 32) {
+        return SoulErr.NameTooLong;
+    }
+    const souls = try self.getAll(allocator);
+    find: for (souls.items, 0..) |soul, idx| {
+        if (std.mem.eql(
+            u8,
+            &soul.name,
+            @as(*[32]u8, @ptrCast(name)),
+        )) {
+            found_idx = idx;
+            break :find;
+        }
+        found_idx = null;
+    }
+    if (found_idx) |idx| {
+        print("{d}", .{idx});
+    }
+    return FindError.SoulNotFound;
+}
+
+test "file create, write, find" {
+    const ctx = comptime TinySQLContext.init("test.db");
+    const fileHandler = try Self.init(ctx);
+    const allocator = std.heap.page_allocator;
+    try fileHandler.createIfNotExists();
+
+    const soul1 = try Soul.fromUserInput("Hung", 19);
+    const soul2 = try Soul.fromUserInput("Ngoc", 18);
+    const soul3 = try Soul.fromUserInput("Zigg", 20);
+
+    try fileHandler.write(soul1);
+    try fileHandler.write(soul2);
+    try fileHandler.write(soul3);
+
+    const found1 = try fileHandler.findA(allocator, "Hung");
+    const found2 = try fileHandler.findA(allocator, "Ngoc");
+    const found3 = try fileHandler.findA(allocator, "Zigg");
+
+    try expect(found1 != null);
+    try expect(found2 != null);
+    try expect(found3 != null);
+}
