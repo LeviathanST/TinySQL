@@ -11,15 +11,13 @@ const Allocator = std.mem.Allocator;
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
     const ctx = comptime TinySQLContext.init("database.db");
+    try ctx.stdout.writeAll("\x1B[2J\x1B[H");
     const fileHandler = try SoulFile.init(ctx);
     const ui = SoulUI.init(ctx);
     try fileHandler.createIfNotExists();
 
-    var choice_buf: [2]u8 = undefined;
-
     w: while (true) {
-        const choice_input = try ctx.stdin.readUntilDelimiter(&choice_buf, '\n');
-        const choice = try std.fmt.parseInt(u8, choice_input, 10);
+        const choice = try ui.menuPrompt();
         switch (choice) {
             1 => {
                 const soul = try ui.writePrompt();
