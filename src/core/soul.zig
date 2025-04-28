@@ -1,5 +1,3 @@
-///! The copying of ArrayList for Soul
-// TODO: Test
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const expect = std.testing.expect;
@@ -12,7 +10,7 @@ pub const Soul = extern struct {
     name: [32]u8,
     age: u8,
 
-    pub fn fromUserInput(name: []u8, age: u8) Error!Self {
+    pub fn fromUserInput(name: []const u8, age: u8) Error!Self {
         if (name.len > 32) return Error.NameTooLong;
         var validated_name = [_]u8{0} ** 32;
         @memcpy(validated_name[0..name.len], name[0..]);
@@ -77,9 +75,9 @@ test "Append 3 items" {
     var souls = try SoulList.init(allocator);
     defer souls.deinit();
 
-    const soul1 = Soul{ .name = "Hung", .age = 19 };
-    const soul2 = Soul{ .name = "Ngoc", .age = 18 };
-    const soul3 = Soul{ .name = "Zigg", .age = 20 };
+    const soul1 = try Soul.fromUserInput("Hung", 19);
+    const soul2 = try Soul.fromUserInput("Ngoc", 18);
+    const soul3 = try Soul.fromUserInput("Zigg", 20);
 
     try souls.append(soul1);
     try souls.append(soul2);
@@ -88,10 +86,10 @@ test "Append 3 items" {
     const slice = souls.intoSlice();
     try expect(std.mem.eql(u8, slice[0].name[0..4], "Hung"));
     try expect(slice[0].age == 19);
-    try expect(std.mem.eql(u8, slice[1].name[0..5], "Alice"));
-    try expect(slice[1].age == 20);
-    try expect(std.mem.eql(u8, slice[2].name[0..3], "Bob"));
-    try expect(slice[2].age == 21);
+    try expect(std.mem.eql(u8, slice[1].name[0..4], "Ngoc"));
+    try expect(slice[1].age == 18);
+    try expect(std.mem.eql(u8, slice[2].name[0..4], "Zigg"));
+    try expect(slice[2].age == 20);
 
     try expect(souls.capacity == 5);
     try expect(souls.current_total == 3);
@@ -105,5 +103,5 @@ test "Error" {
     var buffer_too_long: [34]u8 = [_]u8{0} ** 34;
     @memcpy(buffer_too_long[0.."ThisNameIsWayTooLongToFitIn32Bytes".len], "ThisNameIsWayTooLongToFitIn32Bytes");
 
-    try std.testing.expectError(Soul.Error.NameTooLong, souls.append(&buffer_too_long, 200));
+    try std.testing.expectError(Soul.Error.NameTooLong, Soul.fromUserInput(&buffer_too_long, 19));
 }
