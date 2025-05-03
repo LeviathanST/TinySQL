@@ -15,12 +15,7 @@ pub fn build(b: *std.Build) void {
     const run_step = b.step("run", "Run the application");
     run_step.dependOn(&run_exe.step);
 
-    const main_tests = b.addTest(.{
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    const run_unit_test = b.addRunArtifact(main_tests);
-    const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&run_unit_test.step);
+    const test_cmd = b.addSystemCommand(&.{ "sh", "-c", "zig test src/main.zig 2>&1 | cat" });
+    const test_step = b.step("test", "Run unit tests"); // https://github.com/ziglang/zig/issues/10203
+    test_step.dependOn(&test_cmd.step);
 }
