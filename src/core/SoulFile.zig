@@ -56,7 +56,7 @@ pub fn write(self: Self, soul: Soul) !void {
     defer file.close();
     try file.seekTo(0);
     const current_total = try file.reader().readInt(u16, .little);
-    try file.seekTo(2 + current_total * @sizeOf(Soul));
+    try file.seekTo(2 + @as(usize, current_total) * @sizeOf(Soul));
     try file.writer().writeStruct(soul);
     try file.seekTo(0);
     try file.writer().writeInt(u16, current_total + 1, .little);
