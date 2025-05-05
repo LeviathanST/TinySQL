@@ -30,16 +30,34 @@ pub fn main() !void {
                 continue :w;
             },
             3 => {
-                const name = try ui.findPrompt();
+                const name = try ui.findPrompt(allocator);
+                defer allocator.free(name);
                 const soul = try fileHandler.findA(allocator, name);
                 try ui.displayA(soul);
                 continue :w;
+            },
+            4 => {
+                const name = try ui.findPrompt(allocator);
+                const newData = try ui.updatePrompt();
+                const isUpdated = try fileHandler.updateA(name, newData);
+                if (isUpdated) {
+                    try ctx.stdout.writeAll("Updated!");
+                } else {
+                    try ctx.stdout.writeAll("Not updated!");
+                }
+            },
+            5 => {
+                const name = try ui.findPrompt(allocator);
+                try fileHandler.deleteA(allocator, name);
             },
             else => {
                 break;
             },
         }
     }
+
+    const soul = try fileHandler.findA(allocator, "Hung");
+    try ui.displayA(soul);
 }
 
 test {

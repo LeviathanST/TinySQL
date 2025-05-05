@@ -81,8 +81,33 @@ pub fn writePrompt(self: Self) !Soul {
     return try Soul.fromUserInput(name_input[0..], age);
 }
 
-pub fn findPrompt(self: Self) ![]u8 {
+pub fn findPrompt(self: Self, allocator: std.mem.Allocator) ![]const u8 {
+    try self.ctx.stdout.writeAll("Search Name: ");
     var name_buffer: [100]u8 = undefined;
-    const name_input = try self.ctx.stdin.readUntilDelimiter(name_buffer[0..], '\n');
+    var fbs = std.io.fixedBufferStream(&name_buffer);
+    try self.ctx.stdin.streamUntilDelimiter(fbs.writer(), '\n', fbs.buffer.len);
+    var name_input: []u8 = try allocator.alloc(u8, fbs.getWritten().len);
+    @memcpy(name_input[0..fbs.getWritten().len], fbs.getWritten());
     return name_input;
+}
+
+pub fn updatePrompt(self: Self) !Soul {
+    const stdout = self.ctx.stdout;
+    const stdin = self.ctx.stdin;
+
+    var name_buffer: [100]u8 = undefined;
+    var age_buffer: [3]u8 = undefined;
+
+    try stdout.writeAll("New data:\n");
+    var name_fbs = std.io.fixedBufferStream(&name_buffer);
+    var age_fbs = std.io.fixedBufferStream(&age_buffer);
+    try stdout.writeAll("Name: ");
+    try stdin.streamUntilDelimiter(name_fbs.writer(), '\n', name_buffer.len);
+    try stdout.writeAll("Age: ");
+    try stdin.streamUntilDelimiter(age_fbs.writer(), '\n', age_buffer.len);
+
+    const name_input = name_fbs.getWritten();
+    const age_input = try std.fmt.parseInt(u8, age_fbs.getWritten(), 10);
+
+    return try Soul.fromUserInput(name_input, age_input);
 }
