@@ -11,22 +11,29 @@ pub const Soul = extern struct {
     age: u8,
 
     pub fn fromUserInput(name: []const u8, age: u8) Error!Self {
-        if (name.len > 32) return Error.NameTooLong;
-        var validated_name = [_]u8{0} ** 32;
-        @memcpy(validated_name[0..name.len], name[0..]);
+        const validated_name = try Self.getNameFromSlice(name);
         return .{
             .name = validated_name,
             .age = age,
         };
     }
+
+    pub fn getNameFromSlice(name: []const u8) Error![32]u8 {
+        if (name.len > 32) return Error.NameTooLong;
+        var validated_name = [_]u8{0} ** 32;
+        @memcpy(validated_name[0..name.len], name[0..]);
+        return validated_name;
+    }
 };
 
+/// The copied ArrayList for Soul
+/// corresponds to std.ArrayList(Soul)
 pub const SoulList = struct {
     const Self = @This();
 
     allocator: Allocator,
     items: []Soul,
-    current_total: usize,
+    current_total: u16,
     capacity: usize,
 
     pub fn init(allocator: Allocator) !Self {
@@ -39,13 +46,13 @@ pub const SoulList = struct {
     }
 
     /// Free whole slice memory
-    pub fn deinit(self: *Self) void {
+    pub fn deinit(self: Self) void {
         self.allocator.free(self.intoSlice());
     }
 
     /// Returns a slice of all the souls plus the extra capacity,
     /// whose memory contents are 'undefined'.
-    fn intoSlice(self: *Self) []Soul {
+    fn intoSlice(self: Self) []Soul {
         return self.items.ptr[0..self.capacity];
     }
 
@@ -56,6 +63,22 @@ pub const SoulList = struct {
         self.current_total += 1;
     }
 
+    /// Remove a soul at specific index
+    pub fn removeAt(self: *Self, idx: usize) !void {
+        var newItems = try self.allocator.alloc(Soul, self.capacity);
+        var insert_idx: usize = 0;
+        for (0..self.current_total) |current_idx| {
+            if (current_idx == idx) {
+                continue;
+            }
+            newItems[insert_idx] = self.items[current_idx];
+            insert_idx += 1;
+        }
+        self.allocator.free(self.items);
+        self.items = newItems;
+        self.current_total -= 1;
+    }
+
     /// Ensure 'new_len' is smaller than the current capacity,
     /// if not, it will increase.
     fn ensureTotalCapacity(self: *Self, new_len: usize) Allocator.Error!void {
@@ -64,8 +87,12 @@ pub const SoulList = struct {
             assert(new_capacity > new_len);
             var new_memory = try self.allocator.alloc(Soul, new_capacity);
             @memcpy(new_memory[0..self.items.len], self.items);
+            const old_items = self.items;
             self.capacity = new_capacity;
             self.items = new_memory;
+            if (old_items.len > 0) {
+                self.allocator.free(old_items);
+            }
         }
     }
 };
@@ -93,6 +120,31 @@ test "Append 3 items" {
 
     try expect(souls.capacity == 5);
     try expect(souls.current_total == 3);
+}
+
+test "Remove at" {
+    const allocator = std.testing.allocator;
+    var souls = try SoulList.init(allocator);
+    defer souls.deinit();
+
+    const soul1 = try Soul.fromUserInput("Hung", 19);
+    const soul2 = try Soul.fromUserInput("Ngoc", 18);
+    const soul3 = try Soul.fromUserInput("Zigg", 20);
+
+    try souls.append(soul1);
+    try souls.append(soul2);
+    try souls.append(soul3);
+
+    try expect(souls.current_total == 3);
+    try souls.removeAt(1);
+    try expect(souls.current_total == 2);
+    try expect(std.mem.eql(u8, souls.items[1].name[0..4], "Zigg"));
+    try expect(souls.items[1].age == 20);
+
+    try souls.append(soul2);
+    try souls.removeAt(1);
+    try expect(std.mem.eql(u8, souls.items[1].name[0..4], "Ngoc"));
+    try expect(souls.items[1].age == 18);
 }
 
 test "Error" {
